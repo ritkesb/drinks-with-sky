@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Where Should We Go for Drinks Tonight?</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #e2b0ff, #9b59b6, #f39c12);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 50px;
+            font-style: italic;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .card {
+            background: #16213e;
+            border-radius: 16px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+        }
+
+        .card.wine { border-color: #722f37; }
+        .card.wine:hover { box-shadow: 0 12px 40px rgba(114, 47, 55, 0.4); }
+
+        .card.dive { border-color: #f39c12; }
+        .card.dive:hover { box-shadow: 0 12px 40px rgba(243, 156, 18, 0.4); }
+
+        .card.cocktail { border-color: #9b59b6; }
+        .card.cocktail:hover { box-shadow: 0 12px 40px rgba(155, 89, 182, 0.4); }
+
+        .card .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+        }
+
+        .card.wine h2 { color: #c0392b; }
+        .card.dive h2 { color: #f39c12; }
+        .card.cocktail h2 { color: #9b59b6; }
+
+        .card p {
+            color: #999;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .card .vibe {
+            margin-top: 18px;
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .card.wine .vibe { background: rgba(114, 47, 55, 0.3); color: #e74c3c; }
+        .card.dive .vibe { background: rgba(243, 156, 18, 0.3); color: #f39c12; }
+        .card.cocktail .vibe { background: rgba(155, 89, 182, 0.3); color: #bb8fce; }
+
+        .card.selected {
+            transform: translateY(-8px) scale(1.03);
+        }
+
+        .card.selected::after {
+            content: "LET'S GO HERE";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+
+        .card.wine.selected::after { background: #722f37; }
+        .card.dive.selected::after { background: #b8860b; }
+        .card.cocktail.selected::after { background: #7d3c98; }
+
+        .result {
+            margin-top: 50px;
+            font-size: 1.4rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            line-height: 1.8;
+        }
+
+        .result.visible {
+            opacity: 1;
+        }
+
+        footer {
+            margin-top: auto;
+            padding-top: 60px;
+            color: #555;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Where Should We Go for Drinks Tonight?</h1>
+    <p class="subtitle">Pick one, and let's make it happen</p>
+
+    <div class="cards">
+        <div class="card wine" onclick="pick(this, 'wine')">
+            <div class="icon">🍷</div>
+            <h2>Wine Bar</h2>
+            <p>Moody lighting, a nice Malbec, and actual conversation. For when you want to feel like adults who have their life together.</p>
+            <span class="vibe">Classy & Chill</span>
+        </div>
+
+        <div class="card dive" onclick="pick(this, 'dive')">
+            <div class="icon">🍺</div>
+            <h2>Dive Bar</h2>
+            <p>Sticky floors, cheap drinks, and a jukebox with questionable taste. No pretense, just vibes and probably a pool table.</p>
+            <span class="vibe">Loud & Fun</span>
+        </div>
+
+        <div class="card cocktail" onclick="pick(this, 'cocktail')">
+            <div class="icon">🍸</div>
+            <h2>Cocktail Lounge</h2>
+            <p>Handcrafted drinks with ingredients you can't pronounce. Velvet seats, a menu that's a novella, and drinks that look like art.</p>
+            <span class="vibe">Fancy & Smooth</span>
+        </div>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <footer>Tonight's going to be good either way.</footer>
+
+    <script>
+        const messages = {
+            wine: "Wine bar it is! Time to swirl, sniff, and pretend to know what \"notes of elderberry\" means. Cheers! 🥂",
+            dive: "Dive bar, baby! Who needs ambiance when you've got $4 beers and good company? Let's go! 🎯",
+            cocktail: "Cocktail lounge — fancy! Get ready for drinks that take 10 minutes to make but disappear in 10 seconds. 🪄"
+        };
+
+        function pick(card, type) {
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            const result = document.getElementById('result');
+            result.textContent = messages[type];
+            result.classList.add('visible');
+        }
+    </script>
+</body>
+</html>
